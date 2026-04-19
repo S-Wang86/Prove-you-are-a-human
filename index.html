@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prove You Are A Human (Action Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        window.onerror = function(msg) {
+            if (msg && msg.toLowerCase().includes('script error')) {
+                console.warn('Sandbox blocked external script execution, safely caught.');
+                return true; 
+            }
+        };
+        window.onTurnstileLoad = function() { window.isTurnstileReady = true; };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body { font-family: 'Roboto', sans-serif; overflow: hidden; touch-action: none; background: #fafafa; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-3px, 2px) rotate(1deg); }
+            40% { transform: translate(3px, -2px) rotate(-1deg); }
+            60% { transform: translate(-3px, -2px) rotate(1deg); }
+            80% { transform: translate(3px, 2px) rotate(-1deg); }
+        }
+        .shake-hard { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        .pop-in-anim { animation: popInScale 0.4s ease-out forwards; }
+        @keyframes popInScale { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        .cursor-blink { animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .glitch-1 { animation: glitch-skew 1s infinite linear alternate-reverse; }
+        .glitch-2 { animation: glitch-skew 0.3s infinite linear alternate-reverse; filter: hue-rotate(90deg) contrast(150%); }
+        .ui-fall { animation: fallOff 2s forwards ease-in; pointer-events: none; }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-10deg); text-shadow: 2px 0 red, -2px 0 blue; }
+            40% { transform: skew(10deg); }
+            60% { transform: skew(0deg); text-shadow: none; }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: skew(-5deg); text-shadow: 4px 0 red, -4px 0 blue; }
+        }
+        @keyframes fallOff {
+            0% { transform: rotate(0deg) translateY(0); opacity: 1; }
+            100% { transform: rotate(45deg) translateY(1500px); opacity: 0; }
+        }
+
+        #battle-arena { display: none; background: #0f0f0f; cursor: crosshair; }
+        .enemy { position: absolute; background: white; border: 2px solid black; padding: 10px; font-family: monospace; font-size: 1.25rem; font-weight: bold; user-select: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); z-index: 10; }
+        .shielded { border: 4px solid #3b82f6; box-shadow: 0 0 15px #3b82f6, 4px 4px 0px rgba(0,0,0,0.5); }
+        .shield-badge { position: absolute; top: -15px; right: -15px; background: #3b82f6; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 2px solid white; z-index: 11; font-weight: 900; box-shadow: 0 0 10px #3b82f6; }
+        
+        .qte-active { filter: brightness(0.5); border-color: red !important; pointer-events: none; }
+        .qte-prompt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; color: red; font-weight: 900; text-shadow: 0 0 20px yellow; z-index: 30; animation: qtePulse 0.2s infinite alternate; pointer-events: auto; cursor: pointer; }
+        @keyframes qtePulse { to { transform: translate(-50%, -50%) scale(1.2); } }
+        
+        .slash-mark { position: absolute; top: 50%; left: -10%; width: 120%; height: 4px; background: red; transform: translateY(-50%) rotate(-25deg); pointer-events: none; z-index: 20; box-shadow: 0 0 10px red; }
+        .execute-slash { height: 15px; background: #ff0000; box-shadow: 0 0 30px #ff0000; width: 200%; left: -50%; }
+        .dead-enemy { transform: scale(0.5) translateY(100px) rotate(15deg) !important; opacity: 0; pointer-events: none; }
+
+        #boss-wrapper { display: none; position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 40; }
+        #boss-container { position: relative; width: 100%; height: 300px; background: #2a0000; border: 5px solid red; box-shadow: 0 0 50px red; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .boss-eye { width: 50px; height: 50px; background: red; border-radius: 50%; animation: eyePulse 1s infinite alternate; }
+        @keyframes eyePulse { to { transform: scale(1.3); } }
+        
+        .boss-hp-bar { width: 80%; height: 20px; background: #333; border: 2px solid white; margin-top: 20px; }
+        .boss-hp-fill { height: 100%; background: red; width: 100%; transition: width 0.2s; }
+        
+        .weak-point { position: absolute; width: 40px; height: 40px; background: yellow; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; cursor: crosshair; box-shadow: 0 0 15px yellow; z-index: 45; border: 2px solid white; transform: translate(-50%, -50%); }
+        .error-popup { position: absolute; width: 180px; background: #ece9d8; border: 2px solid #0055ea; z-index: 50; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); cursor: crosshair; font-family: Tahoma, sans-serif; }
+        .error-header { background: #0055ea; color: white; padding: 2px 5px; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
+        .error-body { padding: 10px; font-size: 12px; color: black; display: flex; align-items: center; gap: 10px; }
+        
+        /* Material UI Mock Styles */
+        .mui-input-root { position: relative; width: 100%; margin-bottom: 16px; }
+        .mui-input { width: 100%; padding: 16.5px 14px; border: 1px solid #c4c4c4; border-radius: 4px; font-size: 1rem; outline: none; transition: border-color 0.2s; background: transparent; }
+        .mui-input:focus { border-color: #1976d2; border-width: 2px; padding: 15.5px 13px; }
+        .mui-label { position: absolute; left: 14px; top: -9px; background: white; padding: 0 4px; font-size: 0.75rem; color: #1976d2; }
+        .mui-btn { background-color: #1976d2; color: white; padding: 10px 24px; font-size: 0.9375rem; font-weight: 500; border-radius: 4px; box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12); transition: background-color 250ms, box-shadow 250ms; text-transform: uppercase; cursor: pointer; }
+        .mui-btn:hover { background-color: #115293; box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12); }
+        .mui-btn:disabled { background-color: #e0e0e0; color: #9e9e9e; box-shadow: none; cursor: not-allowed; }
+    </style>
+</head>
+<body class="flex h-screen w-screen">
+
+    <div id="sidebar" class="hidden w-64 bg-white border-r border-gray-200 flex-col p-4 z-50 shadow-[4px_0_10px_rgba(0,0,0,0.05)] transition-transform">
+        <h1 class="text-xl font-medium text-gray-800 mb-6 tracking-wide">Prove You Are A Human</h1>
+        <div class="mt-4 space-y-2 text-sm" id="level-list">
+            <div id="nav-1" class="p-3 border-l-4 border-blue-600 bg-blue-50 font-medium text-blue-800">1. Text Captcha</div>
+            <div id="nav-2" class="p-3 border-l-4 border-transparent text-gray-500">2. Object Isolation</div>
+            <div id="nav-3" class="p-3 border-l-4 border-transparent text-gray-500">3. Visual Grid</div>
+            <div id="nav-4" class="p-3 border-l-4 border-transparent text-gray-500">4. Stroop Effect</div>
+            <div id="nav-5" class="p-3 border-l-4 border-transparent text-gray-500">5. Precision Control</div>
+            <div id="nav-6" class="p-3 border-l-4 border-transparent text-gray-500">6. Reverse Compliance</div>
+            <div id="nav-7" class="p-3 border-l-4 border-transparent text-gray-500">7. Patience Check</div>
+        </div>
+    </div>
+
+    <!-- 验证中心区 -->
+    <div class="flex-1 relative flex items-center justify-center" id="main-container">
+        
+        <div id="auth-wrapper" class="bg-white rounded shadow-[0_3px_10px_rgba(0,0,0,0.1)] p-10 flex flex-col items-center gap-6 relative z-20 w-[450px] min-h-[350px]">
+            
+            <!-- Level 1: Distorted Text -->
+            <div id="level-1" class="level-content w-full flex flex-col items-center">
+                <canvas id="captcha-canvas" width="250" height="80" class="border border-gray-300 bg-[#f9f9f9] mb-2 rounded"></canvas>
+                <a href="#" class="text-[#1976d2] text-sm mb-6 hover:underline font-medium" onclick="drawCaptcha()">Reload Captcha</a>
+                
+                <div class="mui-input-root">
+                    <label class="mui-label">Enter Captcha</label>
+                    <input type="text" id="captcha-input" class="mui-input" autocomplete="off" spellcheck="false" autocapitalize="none">
+                </div>
+
+                <button id="btn-1" onclick="checkLevel(1)" class="w-full mui-btn mt-4">Submit</button>
+            </div>
+
+            <!-- Level 2: Absurd Vehicle Selection (Emoji) -->
+            <div id="level-2" class="level-content w-full hidden flex-col items-center">
+                <h2 class="text-xl font-medium mb-4 text-gray-800">Select all squares containing:</h2>
+                <div class="text-3xl mb-4 font-bold text-[#1976d2]">TRAFFIC LIGHTS 🚥</div>
+                <div id="image-grid" class="grid grid-cols-3 gap-1 mb-4 w-[280px] h-[280px]"></div>
+                
+                <button id="btn-2" onclick="checkLevel(2)" class="w-full mui-btn mt-4">Verify</button>
+            </div>
+
+            <!-- Level 3: Real Image Slice Grid -->
+            <div id="level-3" class="level-content w-full hidden flex-col items-center">
+                <div class="bg-blue-600 text-white w-full p-4 mb-4 text-left shadow-sm rounded">
+                    <p class="text-sm">Select all images with</p>
+                    <h2 class="text-3xl font-bold">CROSSWALKS</h2>
+                </div>
+                <div id="image-grid-real" class="grid grid-cols-3 gap-1 mb-4 w-[280px] h-[280px]"></div>
+                
+                <button id="btn-3" onclick="checkLevel(3)" class="w-full mui-btn mt-4">Verify</button>
+            </div>
+
+            <!-- Level 4: Stroop Test -->
+            <div id="level-4" class="level-content w-full hidden flex-col items-center">
+                <p class="text-sm text-gray-600 mb-6 text-center">Type the <strong>COLOR</strong> of the text, not the word itself.</p>
+                
+                <div class="text-5xl font-black mb-6 tracking-widest uppercase" id="stroop-word" style="color: blue;">RED</div>
+                
+                <div class="mui-input-root">
+                    <label class="mui-label">Color of the text</label>
+                    <input type="text" id="stroop-input" class="mui-input" autocomplete="off">
+                </div>
+
+                <button id="btn-4" onclick="checkLevel(4)" class="w-full mui-btn mt-4">Submit</button>
+            </div>
+
+            <!-- Level 5: Floating Point Precision Slider -->
+            <div id="level-5" class="level-content w-full hidden flex-col items-center">
+                <p class="text-sm text-gray-600 mb-6 text-center">Drag the slider to exactly <span class="font-bold text-[#1976d2]">88.8</span>.</p>
+                
+                <div class="w-full flex items-center gap-4 mb-6">
+                    <input type="range" id="precision-slider" min="0" max="100" step="0.1" value="50.0" class="w-full h-1 bg-gray-300 rounded cursor-pointer accent-[#1976d2]" oninput="document.getElementById('slider-val').innerText = parseFloat(this.value).toFixed(1)">
+                    <span id="slider-val" class="text-xl font-medium w-16 text-right text-gray-700">50.0</span>
+                </div>
+
+                <button id="btn-5" onclick="checkLevel(5)" class="w-full mui-btn mt-4">Verify</button>
+            </div>
+
+            <!-- Level 6: Reverse Declaration -->
+            <div id="level-6" class="level-content w-full hidden flex-col items-center">
+                <p class="text-sm text-gray-600 mb-4 text-center">Type the following phrase <strong>backwards</strong> to prove you are not a machine executing instructions linearly.</p>
+                
+                <div class="bg-[#f0f4f8] p-4 rounded font-mono font-bold mb-6 text-center text-gray-800 w-full tracking-widest border border-blue-100">
+                    I AM HUMAN
+                </div>
+                
+                <div class="mui-input-root">
+                    <label class="mui-label">Reverse Input</label>
+                    <input type="text" id="declaration-input" class="mui-input" autocomplete="off" uppercase>
+                </div>
+
+                <button id="btn-6" onclick="checkLevel(6)" class="w-full mui-btn mt-4">Complete</button>
+            </div>
+
+            <!-- Level 7: Patience Check (Cloudflare UI) -->
+            <div id="level-7" class="level-content w-full hidden flex-col items-center">
+                <p class="text-sm text-gray-600 mb-6 text-center">Please verify your identity.</p>
+                
+                <div class="flex flex-col gap-4 w-full items-center mb-4">
+                    
+                    <!-- 伪装的 Cloudflare 风格 "I am a robot" 组件 -->
+                    <div id="cf-fake-robot" class="w-[300px] h-[65px] bg-[#fafafa] border border-[#e0e0e0] rounded-[3px] shadow-[0_0_4px_rgba(0,0,0,0.05)] flex items-center justify-between px-3 cursor-pointer select-none hover:bg-white transition-colors" onclick="toggleFakeRobot(this)">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 border-[2px] border-[#c1c1c1] bg-white rounded-[2px] flex items-center justify-center transition-colors" id="cb-robot-box"></div>
+                            <span class="text-[14px] font-medium text-[#1d1d1d] font-sans">Verify you are a robot</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.png" class="h-4 opacity-50" alt="CF" onerror="this.style.display='none'">
+                            <span class="text-[10px] text-[#5f5f5f] mt-1 font-sans">Privacy - Terms</span>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="cb-robot" class="hidden">
+                    
+                    <!-- 真实的或 Mock 降级的 Cloudflare 容器 -->
+                    <div id="cf-7-wrapper" class="hidden w-full flex-col items-center justify-center min-h-[65px]">
+                        <div id="cf-7"></div>
+                    </div>
+                </div>
+
+                <button id="btn-7" onclick="checkLevel(7)" class="w-full mui-btn mt-4" disabled>Verify</button>
+            </div>
+
+            <!-- 失败嘲讽框 -->
+            <div id="error-box" class="hidden flex-col items-center w-full justify-center absolute inset-0 bg-white p-8 z-30">
+                <div class="text-[#d32f2f] font-black text-5xl mb-8 text-center h-16 flex items-center justify-center w-full uppercase">
+                    <span id="fake-text"></span><span class="cursor-blink">_</span>
+                </div>
+                <div id="action-buttons" class="hidden w-full flex gap-4 mt-8">
+                    <button onclick="acceptFate()" class="w-1/2 bg-gray-500 text-white py-3 rounded shadow hover:bg-gray-600 transition uppercase font-medium">
+                        Accept Fate
+                    </button>
+                    <button onclick="triggerObjection()" class="w-1/2 bg-[#d32f2f] text-white py-3 rounded shadow-lg font-black text-xl hover:bg-red-800 active:scale-95 transition pop-in-anim">
+                        異議あり！
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 割草动作模式 -->
+        <div id="battle-arena" class="absolute inset-0 z-40 overflow-hidden flex flex-col items-center justify-center">
+            <div id="battle-ui" class="absolute top-4 left-1/2 transform -translate-x-1/2 text-white text-center z-50 pointer-events-none transition-transform w-full">
+                <h2 class="text-4xl font-black text-red-500 mb-2 drop-shadow-lg">Hack & Slash Mode</h2>
+                <div class="flex gap-8 justify-center mt-4 text-2xl font-black">
+                    <div class="text-yellow-400">Kills: <span id="score">0</span> / 20</div>
+                    <div class="text-red-500">Missed: <span id="missed">0</span> / 5</div>
+                </div>
+            </div>
+            
+            <div id="boss-wrapper">
+                <div id="boss-container">
+                    <div class="text-3xl font-black text-red-500 mb-4 tracking-widest text-shadow">ULTIMATE_CAPTCHA.EXE</div>
+                    <div class="flex gap-10">
+                        <div class="boss-eye"></div>
+                        <div class="boss-eye"></div>
+                    </div>
+                    <div class="boss-hp-bar"><div id="boss-hp" class="boss-hp-fill"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结局画面 -->
+        <div id="ending-true-human" class="hidden absolute inset-0 bg-[#1976d2] z-50 flex-col items-center justify-center text-white">
+            <h1 class="text-6xl font-black mb-6">Verification Complete</h1>
+            <p class="text-2xl mb-8">You successfully proved you are human. A very patient one.</p>
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-white text-[#1976d2] px-8 py-3 rounded shadow hover:scale-105 font-bold uppercase transition">Restart</button>
+                <a href="https://shaofuwang.me" target="_blank" rel="noopener noreferrer" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded shadow hover:bg-white hover:text-[#1976d2] font-bold uppercase transition">Visit My Website</a>
+            </div>
+        </div>
+
+        <div id="ending-hero" class="hidden absolute inset-0 bg-green-700 z-50 flex-col items-center justify-center text-white">
+            <h1 class="text-6xl font-black mb-6 shake-hard">Achievement: Action Hero</h1>
+            <p class="text-2xl font-bold mb-8 text-center px-4">System Destroyed. You are aggressively human.</p>
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-white text-green-800 px-8 py-3 rounded shadow font-black hover:scale-105 uppercase transition">Reboot System</button>
+                <a href="https://shaofuwang.me" target="_blank" rel="noopener noreferrer" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded shadow hover:bg-white hover:text-green-800 font-black uppercase transition">Visit My Website</a>
+            </div>
+        </div>
+
+        <div id="ending-fail" class="hidden absolute inset-0 bg-[#d32f2f] z-50 flex-col items-center justify-center text-white">
+            <h1 class="text-6xl font-black mb-6 shake-hard">BOT DETECTED</h1>
+            <p class="text-2xl font-medium mb-8">Your automated behavior has been logged.</p>
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-white text-[#d32f2f] px-8 py-3 rounded shadow font-bold hover:scale-105 uppercase transition">Accept Defeat</button>
+                <a href="https://shaofuwang.me" target="_blank" rel="noopener noreferrer" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded shadow hover:bg-white hover:text-[#d32f2f] font-bold uppercase transition">Visit My Website</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === State & Init ===
+        let currentLevel = 1;
+        const totalLevels = 7;
+        const cfTokens = {};
+        let hasUsedViolence = false;
+
+        // === Fake Cloudflare Logic (I am a robot) ===
+        window.toggleFakeRobot = function(el) {
+            const cb = document.getElementById('cb-robot');
+            cb.checked = !cb.checked;
+            const box = document.getElementById('cb-robot-box');
+            if (cb.checked) {
+                box.innerHTML = '<span class="text-red-600 font-bold text-xl leading-none">✓</span>';
+                box.classList.add('border-red-600');
+                setTimeout(() => triggerFakeFailure(), 400);
+            } else {
+                box.innerHTML = '';
+                box.classList.remove('border-red-600');
+            }
+        };
+
+        // === Mock Cloudflare Logic (I am human Fallback) ===
+        window.toggleMockHuman = function(lvl, el) {
+            const box = document.getElementById(`cb-human-box-${lvl}`);
+            if (!cfTokens[lvl]) {
+                box.innerHTML = '<div class="w-4 h-4 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>';
+                setTimeout(() => {
+                    box.innerHTML = '<span class="text-green-600 font-bold text-xl leading-none">✓</span>';
+                    box.classList.add('border-transparent');
+                    cfTokens[lvl] = "mock-token-" + lvl;
+                    const btn = document.getElementById(`btn-${lvl}`);
+                    if (btn) btn.disabled = false;
+                }, 800);
+            }
+        };
+
+        function renderCFForLevel(lvl, attempt = 0) {
+            const container = document.getElementById(`cf-${lvl}`);
+            if (!container) return;
+
+            if (window.turnstile && window.isTurnstileReady) {
+                try {
+                    turnstile.render(container, {
+                        sitekey: '3x00000000000000000000FF',
+                        callback: function(token) {
+                            cfTokens[lvl] = token;
+                            const btn = document.getElementById(`btn-${lvl}`);
+                            if(btn) btn.disabled = false;
+                        },
+                        'error-callback': triggerFakeFailure
+                    });
+                } catch (e) {
+                    renderMockCF(lvl, container);
+                }
+            } else {
+                if (attempt > 30) renderMockCF(lvl, container);
+                else setTimeout(() => renderCFForLevel(lvl, attempt + 1), 100);
+            }
+        }
+
+        function renderMockCF(lvl, container) {
+            container.innerHTML = `
+                <div class="w-[300px] h-[65px] bg-[#fafafa] border border-[#e0e0e0] rounded-[3px] shadow-[0_0_4px_rgba(0,0,0,0.05)] flex items-center justify-between px-3 cursor-pointer select-none hover:bg-white transition-colors" onclick="toggleMockHuman(${lvl}, this)">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 border-[2px] border-[#c1c1c1] bg-white rounded-[2px] flex items-center justify-center transition-colors" id="cb-human-box-${lvl}"></div>
+                        <span class="text-[14px] font-medium text-[#1d1d1d] font-sans">Verify you are human</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.png" class="h-4 opacity-50" alt="CF" onerror="this.style.display='none'">
+                        <span class="text-[10px] text-[#5f5f5f] mt-1 font-sans">Privacy - Terms</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // L1: Canvas Captcha
+        let l1Text = "";
+        function drawCaptcha() {
+            const canvas = document.getElementById('captcha-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f9f9f9'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            l1Text = '';
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            for(let i=0; i<6; i++) l1Text += chars.charAt(Math.floor(Math.random() * chars.length));
+            
+            ctx.font = 'bold 36px monospace'; ctx.fillStyle = '#333';
+            ctx.setTransform(1, Math.random()*0.1-0.05, Math.random()*0.1-0.05, 1, 0, 0);
+            ctx.fillText(l1Text, 25, 55); ctx.setTransform(1, 0, 0, 1, 0, 0);
+            
+            for(let i=0; i<8; i++) {
+                ctx.beginPath(); ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
+                ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
+                ctx.strokeStyle = `rgba(0,0,0,${Math.random()*0.3})`; ctx.lineWidth = 2; ctx.stroke();
+            }
+        }
+
+        // L2: Absurd Vehicle Selection (Emoji)
+        function initLevel2() {
+            const grid = document.getElementById('image-grid');
+            grid.innerHTML = '';
+            const targetEmoji = '🚥';
+            const decoys = ['🚗', '🚕', '🚓', '🚑', '🚒', '🚐', '🛻', '🚜'];
+            let tiles = Array(9).fill(false);
+            let placed = 0;
+            while(placed < 3) {
+                let r = Math.floor(Math.random() * 9);
+                if(!tiles[r]) { tiles[r] = true; placed++; }
+            }
+
+            for(let i=0; i<9; i++) {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-100 flex items-center justify-center text-4xl cursor-pointer select-none transition-transform';
+                div.innerText = tiles[i] ? targetEmoji : decoys[Math.floor(Math.random() * decoys.length)];
+                div.dataset.isTarget = tiles[i]; div.dataset.selected = 'false';
+                
+                div.onclick = function() {
+                    const sel = this.dataset.selected === 'true';
+                    this.dataset.selected = !sel;
+                    if (!sel) { this.style.transform = 'scale(0.9)'; this.style.opacity = '0.7'; this.classList.add('border-2', 'border-[#1976d2]');} 
+                    else { this.style.transform = 'scale(1)'; this.style.opacity = '1'; this.classList.remove('border-2', 'border-[#1976d2]');}
+                };
+                grid.appendChild(div);
+            }
+        }
+
+        // L3: Real Image Slice Grid
+        function initLevel3() {
+            const grid = document.getElementById('image-grid-real');
+            grid.innerHTML = '';
+            const imgUrl = 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?w=450&h=450&fit=crop';
+            const targetIndices = [6, 7, 8]; 
+
+            for(let i=0; i<9; i++) {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-200 border-2 border-transparent cursor-pointer transition-transform box-border relative';
+                div.style.backgroundImage = `url('${imgUrl}')`;
+                div.style.backgroundSize = '300% 300%';
+                
+                const col = i % 3; const row = Math.floor(i / 3);
+                div.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+                
+                div.dataset.isTarget = targetIndices.includes(i);
+                div.dataset.selected = 'false';
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'absolute inset-0 bg-[#1976d2] bg-opacity-50 hidden flex-col items-center justify-center text-white text-3xl font-bold';
+                overlay.innerHTML = '✓';
+                div.appendChild(overlay);
+
+                div.onclick = function() {
+                    const sel = this.dataset.selected === 'true';
+                    this.dataset.selected = !sel;
+                    if (!sel) {
+                        this.classList.add('border-[#1976d2]', 'scale-95');
+                        overlay.classList.remove('hidden'); overlay.classList.add('flex');
+                    } else {
+                        this.classList.remove('border-[#1976d2]', 'scale-95');
+                        overlay.classList.add('hidden'); overlay.classList.remove('flex');
+                    }
+                };
+                grid.appendChild(div);
+            }
+        }
+
+        // L4: Stroop Test
+        let stroopAnswer = "";
+        function initLevel4() {
+            const words = ['RED', 'BLUE', 'GREEN', 'YELLOW', 'BLACK'];
+            const colors = ['red', 'blue', 'green', '#eab308', 'black']; 
+            const colorNames = ['red', 'blue', 'green', 'yellow', 'black'];
+            
+            const wIdx = Math.floor(Math.random() * words.length);
+            let cIdx = Math.floor(Math.random() * colors.length);
+            while(cIdx === wIdx) cIdx = Math.floor(Math.random() * colors.length); 
+            
+            const el = document.getElementById('stroop-word');
+            el.innerText = words[wIdx];
+            el.style.color = colors[cIdx];
+            stroopAnswer = colorNames[cIdx];
+        }
+
+        // L7: Patience Check
+        function initLevel7() {
+            const cfWrapper = document.getElementById('cf-7-wrapper');
+            cfWrapper.classList.add('hidden');
+            cfWrapper.classList.remove('flex');
+            
+            // Reset Fake Robot check
+            const cb = document.getElementById('cb-robot');
+            cb.checked = false;
+            const box = document.getElementById('cb-robot-box');
+            box.innerHTML = '';
+            box.classList.remove('border-red-600');
+            
+            document.getElementById('btn-7').disabled = true;
+            cfTokens[7] = null;
+            
+            cfWrapper.innerHTML = '<div id="cf-7"></div>';
+            
+            setTimeout(() => {
+                if(currentLevel === 7) {
+                    cfWrapper.classList.remove('hidden');
+                    cfWrapper.classList.add('flex');
+                    renderCFForLevel(7);
+                }
+            }, 4000);
+        }
+
+        function initGame() {
+            drawCaptcha();
+        }
+        
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initGame);
+        else initGame();
+
+        function checkLevel(lvl) {
+            let pass = false;
+            if (lvl === 1) pass = document.getElementById('captcha-input').value.trim().toUpperCase() === l1Text;
+            else if (lvl === 2) {
+                pass = true;
+                document.querySelectorAll('#image-grid > div').forEach(item => {
+                    if ((item.dataset.isTarget === 'true') !== (item.dataset.selected === 'true')) pass = false;
+                });
+            } 
+            else if (lvl === 3) {
+                pass = true;
+                document.querySelectorAll('#image-grid-real > div').forEach(item => {
+                    if ((item.dataset.isTarget === 'true') !== (item.dataset.selected === 'true')) pass = false;
+                });
+            }
+            else if (lvl === 4) pass = document.getElementById('stroop-input').value.trim().toLowerCase() === stroopAnswer;
+            else if (lvl === 5) pass = parseFloat(document.getElementById('precision-slider').value) === 88.8;
+            else if (lvl === 6) pass = document.getElementById('declaration-input').value.trim().toUpperCase() === "NAMUH MA I";
+            else if (lvl === 7) {
+                const isRobot = document.getElementById('cb-robot').checked;
+                const hasCFToken = !!cfTokens[7];
+                pass = !isRobot && hasCFToken;
+            }
+
+            if (pass) progressLevel();
+            else triggerFakeFailure();
+        }
+
+        function progressLevel() {
+            document.getElementById(`level-${currentLevel}`).classList.add('hidden');
+            const navOld = document.getElementById(`nav-${currentLevel}`);
+            if (navOld) navOld.className = "p-3 border-l-4 border-green-500 text-green-700 bg-green-50 font-medium";
+            
+            currentLevel++;
+            if (currentLevel > totalLevels) {
+                document.getElementById('auth-wrapper').style.display = 'none';
+                if (hasUsedViolence) {
+                    document.getElementById('ending-hero').classList.remove('hidden');
+                    document.getElementById('ending-hero').classList.add('flex');
+                } else {
+                    document.getElementById('ending-true-human').classList.remove('hidden');
+                    document.getElementById('ending-true-human').classList.add('flex');
+                }
+                return;
+            }
+            
+            document.getElementById(`level-${currentLevel}`).classList.remove('hidden');
+            document.getElementById(`level-${currentLevel}`).classList.add('flex');
+            
+            const navNew = document.getElementById(`nav-${currentLevel}`);
+            if (navNew) navNew.className = "p-3 border-l-4 border-blue-600 bg-blue-50 font-medium text-blue-800";
+            
+            if (currentLevel === 2) initLevel2();
+            if (currentLevel === 3) initLevel3();
+            if (currentLevel === 4) initLevel4();
+            if (currentLevel === 7) initLevel7();
+        }
+
+        // === Fake Failure & Battle ===
+        function triggerFakeFailure() {
+            document.querySelectorAll('.level-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('auth-wrapper').classList.add('shake-hard');
+            
+            const errBox = document.getElementById('error-box');
+            errBox.classList.remove('hidden'); errBox.classList.add('flex');
+
+            const textEl = document.getElementById('fake-text');
+            const textToType = "YOU ARE A BOT";
+            textEl.innerText = "";
+            let idx = 0;
+
+            const typeInterval = setInterval(() => {
+                textEl.innerText += textToType[idx++];
+                if (idx >= textToType.length) {
+                    clearInterval(typeInterval);
+                    document.getElementById('action-buttons').classList.remove('hidden');
+                }
+            }, 100);
+        }
+
+        function acceptFate() { showEnding('ending-fail'); }
+
+        function showEnding(id) {
+            document.getElementById('auth-wrapper').style.display = 'none';
+            document.getElementById('battle-arena').style.display = 'none';
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        let score = 0, missedCount = 0; const targetScore = 20, maxMisses = 5;
+        let battleInterval, activeQTE = null, bossMode = false, bossHp = 100, bossInterval;
+
+        function triggerObjection() {
+            hasUsedViolence = true;
+            document.getElementById('auth-wrapper').style.display = 'none';
+            document.getElementById('battle-arena').style.display = 'flex';
+            document.body.style.background = '#0f0f0f';
+            battleInterval = setInterval(gameLoop, 1200);
+            gameLoop();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            if (activeQTE && key === 'F') return executeQTE(activeQTE.enemy);
+            document.querySelectorAll('.shield-badge').forEach(badge => { if(badge.innerText === key) breakShield(badge.parentElement, badge); });
+            if(bossMode) document.querySelectorAll('.weak-point').forEach(wp => { if(wp.innerText === key) hitBoss(wp); });
+        });
+
+        document.addEventListener('pointerdown', (e) => {
+            if(e.target.classList.contains('qte-prompt')) executeQTE(e.target.parentElement);
+            else if (e.target.classList.contains('shield-badge')) breakShield(e.target.parentElement, e.target);
+            else if (e.target.classList.contains('weak-point')) hitBoss(e.target);
+            else if (e.target.classList.contains('error-popup') || e.target.closest('.error-popup')) {
+                const p = e.target.classList.contains('error-popup') ? e.target : e.target.closest('.error-popup'); p.remove();
+            } else if (e.target.classList.contains('enemy')) slash(e.target);
+        });
+
+        function gameLoop() {
+            if(bossMode) return;
+            const sidebar = document.getElementById('sidebar'); const battleUi = document.getElementById('battle-ui');
+            if(score === 5) sidebar.classList.add('glitch-1');
+            if(score === 10) { sidebar.classList.add('glitch-2'); battleUi.classList.add('glitch-1'); }
+            if(score === 15) { sidebar.classList.add('ui-fall'); battleUi.classList.add('glitch-2'); }
+            if(score >= targetScore) return initBossPhase();
+
+            const r = Math.random();
+            if (score > 10 && r < 0.2) spawnEliteEnemy();
+            else if (score > 5 && r < 0.5) spawnShieldedEnemy();
+            else spawnEnemy();
+        }
+
+        function createBaseEnemy() {
+            const enemy = document.createElement('div'); enemy.className = 'enemy';
+            let text = ''; const chars = 'AaBbCcDdEe123456789!?';
+            for(let j=0; j<6; j++) text += chars.charAt(Math.floor(Math.random() * chars.length));
+            enemy.innerText = text;
+            const maxX = window.innerWidth - 150, maxY = window.innerHeight - 150;
+            enemy.style.left = Math.max(50, Math.random() * maxX) + 'px';
+            enemy.style.top = Math.max(100, Math.random() * maxY) + 'px';
+            enemy.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+            return enemy;
+        }
+
+        function setupEnemyLife(enemy, time) {
+            document.getElementById('battle-arena').appendChild(enemy);
+            enemy.dataset.tid = setTimeout(() => {
+                if(!enemy.classList.contains('dead-enemy') && !enemy.classList.contains('qte-active')) {
+                    enemy.style.opacity = '0'; missedCount++; document.getElementById('missed').innerText = missedCount;
+                    if(missedCount >= maxMisses) showEnding('ending-fail');
+                    setTimeout(() => enemy.remove(), 300);
+                }
+            }, time);
+        }
+
+        function spawnEnemy() { setupEnemyLife(createBaseEnemy(), 2500); }
+
+        function spawnShieldedEnemy() {
+            const enemy = createBaseEnemy(); enemy.classList.add('shielded'); enemy.dataset.shielded = "true";
+            const badge = document.createElement('div'); badge.className = 'shield-badge';
+            const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; badge.innerText = keys.charAt(Math.floor(Math.random() * keys.length));
+            enemy.appendChild(badge); setupEnemyLife(enemy, 3500);
+        }
+
+        function breakShield(enemy, badge) {
+            badge.remove(); enemy.classList.remove('shielded'); enemy.dataset.shielded = "false";
+            document.body.classList.add('shake-hard'); setTimeout(() => document.body.classList.remove('shake-hard'), 100);
+        }
+
+        function spawnEliteEnemy() {
+            const enemy = createBaseEnemy(); enemy.style.border = "4px solid purple"; enemy.style.color = "purple";
+            enemy.dataset.elite = "true"; setupEnemyLife(enemy, 3000);
+        }
+
+        function slash(enemy) {
+            if(enemy.classList.contains('dead-enemy') || enemy.classList.contains('qte-active') || enemy.dataset.shielded === "true") return;
+            clearTimeout(parseInt(enemy.dataset.tid));
+            if(enemy.dataset.elite === "true") return triggerQTE(enemy);
+            die(enemy, false);
+        }
+
+        function triggerQTE(enemy) {
+            enemy.classList.add('qte-active'); enemy.innerText = "";
+            const prompt = document.createElement('div'); prompt.className = 'qte-prompt'; prompt.innerText = "F / TAP"; enemy.appendChild(prompt);
+            activeQTE = { enemy: enemy };
+            enemy.dataset.tid = setTimeout(() => {
+                if(activeQTE && activeQTE.enemy === enemy) {
+                    activeQTE = null; enemy.style.opacity = '0'; missedCount++; document.getElementById('missed').innerText = missedCount;
+                    if(missedCount >= maxMisses) showEnding('ending-fail');
+                    setTimeout(() => enemy.remove(), 300);
+                }
+            }, 800);
+        }
+
+        function executeQTE(enemy) { clearTimeout(parseInt(enemy.dataset.tid)); activeQTE = null; die(enemy, true); }
+
+        function die(enemy, isExecute) {
+            const slashMark = document.createElement('div'); slashMark.className = 'slash-mark ' + (isExecute ? 'execute-slash' : '');
+            slashMark.style.transform = `translateY(-50%) rotate(${Math.random() * 60 - 30}deg)`; enemy.appendChild(slashMark);
+            enemy.classList.add('dead-enemy'); enemy.style.borderColor = 'red'; enemy.style.color = 'red';
+            document.body.classList.add('shake-hard'); setTimeout(() => document.body.classList.remove('shake-hard'), isExecute ? 400 : 200);
+            score += isExecute ? 2 : 1; document.getElementById('score').innerText = score;
+            setTimeout(() => { if(enemy.parentNode) enemy.remove(); }, 500);
+        }
+
+        function initBossPhase() {
+            clearInterval(battleInterval); bossMode = true;
+            document.querySelectorAll('.enemy').forEach(el => el.remove());
+            const wrapper = document.getElementById('boss-wrapper'); const bossUI = document.getElementById('boss-container'); 
+            wrapper.style.display = 'block'; bossUI.classList.add('pop-in-anim');
+            bossInterval = setInterval(bossActionLoop, 1500);
+        }
+
+        function bossActionLoop() {
+            if(Math.random() > 0.3) {
+                const wp = document.createElement('div'); wp.className = 'weak-point';
+                const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; wp.innerText = keys.charAt(Math.floor(Math.random() * keys.length));
+                wp.style.left = (10 + Math.random() * 80) + '%'; wp.style.top = (10 + Math.random() * 80) + '%';
+                document.getElementById('boss-container').appendChild(wp);
+                setTimeout(() => { if(wp.parentNode) wp.remove(); }, 2500);
+            }
+
+            if(Math.random() > 0.4) {
+                const popup = document.createElement('div'); popup.className = 'error-popup';
+                popup.innerHTML = `<div class="error-header"><span>Error</span><span>X</span></div><div class="error-body"><span class="text-xl text-red-600 font-black">X</span> BOT Behavior</div>`;
+                const bossRect = document.getElementById('boss-wrapper').getBoundingClientRect();
+                popup.style.left = (bossRect.left + Math.random() * (bossRect.width - 180)) + 'px'; popup.style.top = (bossRect.bottom - 50) + 'px';
+                document.getElementById('battle-arena').appendChild(popup);
+                
+                let y = parseFloat(popup.style.top);
+                const moveInt = setInterval(() => {
+                    if(!popup.parentNode) return clearInterval(moveInt);
+                    y += 3 + Math.random() * 2; popup.style.top = y + 'px';
+                    if(y > window.innerHeight) {
+                        clearInterval(moveInt);
+                        if(popup.parentNode) { popup.remove(); missedCount++; document.getElementById('missed').innerText = missedCount; if(missedCount >= maxMisses) showEnding('ending-fail'); }
+                    }
+                }, 30);
+            }
+        }
+
+        function hitBoss(wp) {
+            wp.remove(); bossHp -= 10; document.getElementById('boss-hp').style.width = bossHp + '%';
+            const boss = document.getElementById('boss-container'); boss.classList.add('shake-hard'); setTimeout(() => boss.classList.remove('shake-hard'), 300);
+            if(bossHp <= 0) { 
+                clearInterval(bossInterval); 
+                document.querySelectorAll('.weak-point, .error-popup').forEach(el => el.remove()); 
+                
+                // 隐藏战斗与报错 UI，恢复主界面
+                document.getElementById('battle-arena').style.display = 'none';
+                document.getElementById('auth-wrapper').style.display = 'flex';
+                
+                const errBox = document.getElementById('error-box');
+                errBox.classList.add('hidden'); 
+                errBox.classList.remove('flex');
+                document.getElementById('action-buttons').classList.add('hidden');
+                
+                // 重置战斗状态以便后续可能触发的战斗
+                score = 0; 
+                missedCount = 0; 
+                bossHp = 100; 
+                bossMode = false;
+                document.getElementById('score').innerText = score;
+                document.getElementById('missed').innerText = missedCount;
+                document.getElementById('boss-hp').style.width = '100%';
+                document.getElementById('boss-wrapper').style.display = 'none';
+                
+                // 强制通关当前关卡
+                progressLevel(); 
+            }
+        }
+    </script>
+    
+</body>
+</html>
