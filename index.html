@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Are you a human? Prove it</title>
+    <title>Prove You Are A Human (Action Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -53,29 +53,29 @@
         }
 
         #battle-arena { display: none; background: #0f0f0f; cursor: crosshair; }
-        .enemy { position: absolute; background: white; border: 2px solid black; padding: 10px; font-family: monospace; font-size: 1.25rem; font-weight: bold; user-select: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); z-index: 10; }
-        .shielded { border: 4px solid #3b82f6; box-shadow: 0 0 15px #3b82f6, 4px 4px 0px rgba(0,0,0,0.5); }
+        .enemy { position: absolute; background: white; border: 2px solid black; padding: 10px; font-family: monospace; font-size: 1.25rem; font-weight: bold; user-select: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.5); z-index: 10; max-width: 90vw; word-wrap: break-word; }
+        .shielded { border: 4px solid #3b82f6; box-shadow: 0 0 15px #3b82f6, 4px 4px 0px rgba(0,0,0,0.5); transition: transform 0.1s; }
         .shield-badge { position: absolute; top: -15px; right: -15px; background: #3b82f6; color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 1rem; border: 2px solid white; z-index: 11; font-weight: 900; box-shadow: 0 0 10px #3b82f6; }
         
         .qte-active { filter: brightness(0.5); border-color: red !important; pointer-events: none; }
-        .qte-prompt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; color: red; font-weight: 900; text-shadow: 0 0 20px yellow; z-index: 30; animation: qtePulse 0.2s infinite alternate; pointer-events: auto; cursor: pointer; }
+        .qte-prompt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; color: red; font-weight: 900; text-shadow: 0 0 20px yellow; z-index: 30; animation: qtePulse 0.2s infinite alternate; pointer-events: auto; cursor: pointer; }
         @keyframes qtePulse { to { transform: translate(-50%, -50%) scale(1.2); } }
         
         .slash-mark { position: absolute; top: 50%; left: -10%; width: 120%; height: 4px; background: red; transform: translateY(-50%) rotate(-25deg); pointer-events: none; z-index: 20; box-shadow: 0 0 10px red; }
         .execute-slash { height: 15px; background: #ff0000; box-shadow: 0 0 30px #ff0000; width: 200%; left: -50%; }
         .dead-enemy { transform: scale(0.5) translateY(100px) rotate(15deg) !important; opacity: 0; pointer-events: none; }
 
-        #boss-wrapper { display: none; position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 40; }
-        #boss-container { position: relative; width: 100%; height: 300px; background: #2a0000; border: 5px solid red; box-shadow: 0 0 50px red; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #boss-wrapper { display: none; position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 40; }
+        #boss-container { position: relative; width: 100%; height: 250px; background: #2a0000; border: 5px solid red; box-shadow: 0 0 50px red; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        .boss-eye { width: 50px; height: 50px; background: red; border-radius: 50%; animation: eyePulse 1s infinite alternate; }
+        .boss-eye { width: 40px; height: 40px; background: red; border-radius: 50%; animation: eyePulse 1s infinite alternate; }
         @keyframes eyePulse { to { transform: scale(1.3); } }
         
         .boss-hp-bar { width: 80%; height: 20px; background: #333; border: 2px solid white; margin-top: 20px; }
         .boss-hp-fill { height: 100%; background: red; width: 100%; transition: width 0.2s; }
         
         .weak-point { position: absolute; width: 40px; height: 40px; background: yellow; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; cursor: crosshair; box-shadow: 0 0 15px yellow; z-index: 45; border: 2px solid white; transform: translate(-50%, -50%); }
-        .error-popup { position: absolute; width: 180px; background: #ece9d8; border: 2px solid #0055ea; z-index: 50; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); cursor: crosshair; font-family: Tahoma, sans-serif; }
+        .error-popup { position: absolute; width: 180px; max-width: 80vw; background: #ece9d8; border: 2px solid #0055ea; z-index: 50; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); cursor: crosshair; font-family: Tahoma, sans-serif; }
         .error-header { background: #0055ea; color: white; padding: 2px 5px; font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; }
         .error-body { padding: 10px; font-size: 12px; color: black; display: flex; align-items: center; gap: 10px; }
         
@@ -124,9 +124,11 @@
 
             <!-- Level 2: Absurd Vehicle Selection (Emoji) -->
             <div id="level-2" class="level-content w-full hidden flex-col items-center">
-                <h2 class="text-xl font-medium mb-4 text-gray-800 text-center">Select all squares containing:</h2>
-                <div class="text-2xl sm:text-3xl mb-4 font-bold text-[#1976d2] text-center">TRAFFIC LIGHTS 🚥</div>
-                <div id="image-grid" class="grid grid-cols-3 gap-1 mb-4 w-[260px] h-[260px] sm:w-[280px] sm:h-[280px]"></div>
+                <div class="bg-blue-600 text-white w-full p-4 mb-4 text-center sm:text-left shadow-sm rounded">
+                    <p class="text-sm">Select all images with</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Traffic Lights</h2>
+                </div>
+                <div id="image-grid-2" class="grid grid-cols-3 gap-1 mb-4 w-[260px] h-[260px] sm:w-[280px] sm:h-[280px]"></div>
                 
                 <button id="btn-2" onclick="checkLevel(2)" class="w-full mui-btn mt-4">Verify</button>
             </div>
@@ -135,9 +137,9 @@
             <div id="level-3" class="level-content w-full hidden flex-col items-center">
                 <div class="bg-blue-600 text-white w-full p-4 mb-4 text-center sm:text-left shadow-sm rounded">
                     <p class="text-sm">Select all images with</p>
-                    <h2 class="text-2xl sm:text-3xl font-bold">STAIRS</h2>
+                    <h2 class="text-2xl sm:text-3xl font-bold">Traffic Lights</h2>
                 </div>
-                <div id="image-grid-real" class="grid grid-cols-3 gap-1 mb-4 w-[260px] h-[260px] sm:w-[280px] sm:h-[280px]"></div>
+                <div id="image-grid-3" class="grid grid-cols-5 gap-1 mb-4 w-[260px] h-[260px] sm:w-[280px] sm:h-[280px]"></div>
                 
                 <button id="btn-3" onclick="checkLevel(3)" class="w-full mui-btn mt-4">Verify</button>
             </div>
@@ -191,7 +193,7 @@
                 <div class="flex flex-col gap-4 w-full items-center mb-4">
                     
                     <!-- 伪装的 Cloudflare 风格 "I am a robot" 组件 -->
-                    <div id="cf-fake-robot" class="w-full max-w-[300px] h-[65px] bg-[#fafafa] border border-[#e0e0e0] rounded-[3px] shadow-[0_0_4px_rgba(0,0,0,0.05)] flex items-center justify-between px-3 cursor-pointer select-none hover:bg-white transition-colors" onclick="acceptFate()">
+                    <div id="cf-fake-robot" class="w-full max-w-[300px] h-[65px] bg-[#fafafa] border border-[#e0e0e0] rounded-[3px] shadow-[0_0_4px_rgba(0,0,0,0.05)] flex items-center justify-between px-3 cursor-pointer select-none hover:bg-white transition-colors" onclick="toggleFakeRobot(this)">
                         <div class="flex items-center gap-3">
                             <div class="w-6 h-6 sm:w-7 sm:h-7 border-[2px] border-[#c1c1c1] bg-white rounded-[2px] flex items-center justify-center transition-colors" id="cb-robot-box"></div>
                             <span class="text-[12px] sm:text-[14px] font-medium text-[#1d1d1d] font-sans">Verify you are a robot</span>
@@ -231,11 +233,14 @@
         <!-- 割草动作模式 -->
         <div id="battle-arena" class="absolute inset-0 z-40 overflow-hidden flex flex-col items-center justify-center">
             <div id="battle-ui" class="absolute top-4 left-1/2 transform -translate-x-1/2 text-white text-center z-50 pointer-events-none transition-transform w-[90%]">
-                <h2 class="text-2xl sm:text-4xl font-black text-red-500 mb-2 drop-shadow-lg">Hack & Slash Mode</h2>
-                <div class="flex gap-4 sm:gap-8 justify-center mt-2 sm:mt-4 text-lg sm:text-2xl font-black">
+                <h2 class="text-2xl sm:text-4xl font-black text-red-500 mb-1 drop-shadow-lg">Hack & Slash Mode</h2>
+                <div class="flex gap-4 sm:gap-8 justify-center mt-1 sm:mt-2 text-lg sm:text-2xl font-black">
                     <div class="text-yellow-400">Kills: <span id="score">0</span> / 20</div>
                     <div class="text-red-500">Missed: <span id="missed">0</span> / 5</div>
                 </div>
+                <p class="text-[10px] sm:text-xs text-gray-300 mt-2 font-medium tracking-wide bg-black/50 inline-block px-3 py-1 rounded">
+                    🟦  |  🟪  | 🟡 
+                </p>
             </div>
             
             <div id="boss-wrapper">
@@ -380,39 +385,22 @@
 
         // L2: Absurd Vehicle Selection (Emoji)
         function initLevel2() {
-            const grid = document.getElementById('image-grid');
+            const grid = document.getElementById('image-grid-2');
             grid.innerHTML = '';
-            const targetEmoji = '🚥';
-            const decoys = ['🚗', '🚕', '🚓', '🚑', '🚒', '🚐', '🛻', '🚜'];
-            let tiles = Array(9).fill(false);
-            let placed = 0;
-            while(placed < 3) {
-                let r = Math.floor(Math.random() * 9);
-                if(!tiles[r]) { tiles[r] = true; placed++; }
-            }
-
-            for(let i=0; i<9; i++) {
-                const div = document.createElement('div');
-                div.className = 'bg-gray-100 flex items-center justify-center text-4xl cursor-pointer select-none transition-transform';
-                div.innerText = tiles[i] ? targetEmoji : decoys[Math.floor(Math.random() * decoys.length)];
-                div.dataset.isTarget = tiles[i]; div.dataset.selected = 'false';
-                
-                div.onclick = function() {
-                    const sel = this.dataset.selected === 'true';
-                    this.dataset.selected = !sel;
-                    if (!sel) { this.style.transform = 'scale(0.9)'; this.style.opacity = '0.7'; this.classList.add('border-2', 'border-[#1976d2]');} 
-                    else { this.style.transform = 'scale(1)'; this.style.opacity = '1'; this.classList.remove('border-2', 'border-[#1976d2]');}
-                };
-                grid.appendChild(div);
-            }
-        }
-
-        // L3: Real Image Slice Grid
-        function initLevel3() {
-            const grid = document.getElementById('image-grid-real');
-            grid.innerHTML = '';
-            const imgUrl = 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?w=450&h=450&fit=crop';
-            const targetIndices = [6, 7, 8]; 
+            
+            // ==========================================
+            // [修改指南] 如何更换图片和目标数量:
+            // 1. 更换 imgUrl 为你的新图片链接 (推荐使用 1:1 比例的正方形图片)
+            const imgUrl = 'https://tse2.mm.bing.net/th/id/OIP.CLiM0723RTub9X4aQ6-a7wHaE8?rs=1&pid=ImgDetMain&o=7&rm=3';
+            
+            // 2. targetIndices 代表九宫格中含有“目标(比如斑马线)”的方块序号 (0-8)
+            // 布局序号对应如下:
+            // [0] [1] [2]
+            // [3] [4] [5]
+            // [6] [7] [8]
+            // 若想让目标在中间和右上角，只需改成 [2, 4]。随意增删数组里的数字即可。
+            const targetIndices = [0,1,3,4,5,6,7]; 
+            // ==========================================
 
             for(let i=0; i<9; i++) {
                 const div = document.createElement('div');
@@ -428,6 +416,58 @@
                 
                 const overlay = document.createElement('div');
                 overlay.className = 'absolute inset-0 bg-[#1976d2] bg-opacity-50 hidden flex-col items-center justify-center text-white text-3xl font-bold';
+                overlay.innerHTML = '✓';
+                div.appendChild(overlay);
+
+                div.onclick = function() {
+                    const sel = this.dataset.selected === 'true';
+                    this.dataset.selected = !sel;
+                    if (!sel) {
+                        this.classList.add('border-[#1976d2]', 'scale-95');
+                        overlay.classList.remove('hidden'); overlay.classList.add('flex');
+                    } else {
+                        this.classList.remove('border-[#1976d2]', 'scale-95');
+                        overlay.classList.add('hidden'); overlay.classList.remove('flex');
+                    }
+                };
+                grid.appendChild(div);
+            }
+        }
+
+        // L3: Real Image Slice Grid
+        function initLevel3() {
+            const grid = document.getElementById('image-grid-3');
+            grid.innerHTML = '';
+            
+            // ==========================================
+            // [修改指南] 如何更换图片和目标数量:
+            // 1. 更换 imgUrl 为你的新图片链接 (推荐使用 1:1 比例的正方形图片)
+            const imgUrl = 'https://cdn.pixabay.com/photo/2020/09/13/19/09/traffic-lights-5569120_960_720.jpg';
+            
+            // 2. targetIndices 代表九宫格中含有“目标(比如斑马线)”的方块序号 (0-24)
+            // 布局序号对应如下 (5x5):
+            // [0]  [1]  [2]  [3]  [4]
+            // [5]  [6]  [7]  [8]  [9]
+            // [10] [11] [12] [13] [14]
+            // [15] [16] [17] [18] [19]
+            // [20] [21] [22] [23] [24]
+            const targetIndices = [2,3,4,6,7,8,10,11,12,13,15,16,18,23]; 
+            // ==========================================
+
+            for(let i=0; i<25; i++) {
+                const div = document.createElement('div');
+                div.className = 'bg-gray-200 border border-transparent cursor-pointer transition-transform box-border relative';
+                div.style.backgroundImage = `url('${imgUrl}')`;
+                div.style.backgroundSize = '500% 500%';
+                
+                const col = i % 5; const row = Math.floor(i / 5);
+                div.style.backgroundPosition = `${col * 25}% ${row * 25}%`;
+                
+                div.dataset.isTarget = targetIndices.includes(i);
+                div.dataset.selected = 'false';
+                
+                const overlay = document.createElement('div');
+                overlay.className = 'absolute inset-0 bg-[#1976d2] bg-opacity-50 hidden flex-col items-center justify-center text-white text-lg sm:text-xl font-bold';
                 overlay.innerHTML = '✓';
                 div.appendChild(overlay);
 
@@ -502,13 +542,13 @@
             if (lvl === 1) pass = document.getElementById('captcha-input').value.trim().toUpperCase() === l1Text;
             else if (lvl === 2) {
                 pass = true;
-                document.querySelectorAll('#image-grid > div').forEach(item => {
+                document.querySelectorAll('#image-grid-2 > div').forEach(item => {
                     if ((item.dataset.isTarget === 'true') !== (item.dataset.selected === 'true')) pass = false;
                 });
             } 
             else if (lvl === 3) {
                 pass = true;
-                document.querySelectorAll('#image-grid-real > div').forEach(item => {
+                document.querySelectorAll('#image-grid-3 > div').forEach(item => {
                     if ((item.dataset.isTarget === 'true') !== (item.dataset.selected === 'true')) pass = false;
                 });
             }
@@ -598,20 +638,37 @@
             gameLoop();
         }
 
+        // 恢复电脑端键盘监听，键盘操作威力更强（直接秒杀护盾）
         window.addEventListener('keydown', (e) => {
+            if (document.getElementById('battle-arena').style.display !== 'flex') return;
             const key = e.key.toUpperCase();
             if (activeQTE && key === 'F') return executeQTE(activeQTE.enemy);
-            document.querySelectorAll('.shield-badge').forEach(badge => { if(badge.innerText === key) breakShield(badge.parentElement, badge); });
+            document.querySelectorAll('.shield-badge').forEach(badge => { if(badge.innerText === key) hitShield(badge.parentElement, badge, true); });
             if(bossMode) document.querySelectorAll('.weak-point').forEach(wp => { if(wp.innerText === key) hitBoss(wp); });
         });
 
+        // 全面拥抱触摸和点击，摒弃键盘依赖
         document.addEventListener('pointerdown', (e) => {
-            if(e.target.classList.contains('qte-prompt')) executeQTE(e.target.parentElement);
-            else if (e.target.classList.contains('shield-badge')) breakShield(e.target.parentElement, e.target);
-            else if (e.target.classList.contains('weak-point')) hitBoss(e.target);
-            else if (e.target.classList.contains('error-popup') || e.target.closest('.error-popup')) {
-                const p = e.target.classList.contains('error-popup') ? e.target : e.target.closest('.error-popup'); p.remove();
-            } else if (e.target.classList.contains('enemy')) slash(e.target);
+            if (document.getElementById('battle-arena').style.display !== 'flex') return;
+            const target = e.target;
+            
+            if(target.classList.contains('qte-prompt')) {
+                executeQTE(target.parentElement);
+            } else if (target.classList.contains('shield-badge')) {
+                hitShield(target.parentElement, target, false);
+            } else if (target.classList.contains('weak-point')) {
+                hitBoss(target);
+            } else if (target.classList.contains('error-popup') || target.closest('.error-popup')) {
+                const p = target.classList.contains('error-popup') ? target : target.closest('.error-popup'); 
+                p.remove();
+            } else if (target.classList.contains('enemy') || target.closest('.enemy')) {
+                const enemy = target.classList.contains('enemy') ? target : target.closest('.enemy');
+                if (enemy.dataset.shielded === "true") {
+                    hitShield(enemy, enemy.querySelector('.shield-badge'));
+                } else {
+                    slash(enemy);
+                }
+            }
         });
 
         function gameLoop() {
@@ -634,13 +691,16 @@
             for(let j=0; j<6; j++) text += chars.charAt(Math.floor(Math.random() * chars.length));
             enemy.innerText = text;
             
-            // 安全的边界计算，防止生成在可视区域外部
-            const padding = 80;
-            const maxX = Math.max(10, window.innerWidth - padding); 
-            const maxY = Math.max(10, window.innerHeight - padding);
+            // 安全边界：根据手机和电脑屏幕大小动态限制生成范围
+            const enemyWidth = 140; // 预估最大宽度
+            const enemyHeight = 60; // 预估最大高度
+            const safeTopMargin = 120; // 预留给 UI 说明栏的空间
             
-            enemy.style.left = Math.min(Math.max(10, Math.random() * maxX), window.innerWidth - 60) + 'px';
-            enemy.style.top = Math.min(Math.max(80, Math.random() * maxY), window.innerHeight - 60) + 'px';
+            const maxX = Math.max(10, window.innerWidth - enemyWidth - 20); 
+            const maxY = Math.max(10, window.innerHeight - enemyHeight - 20);
+            
+            enemy.style.left = Math.max(10, Math.random() * maxX) + 'px';
+            enemy.style.top = Math.max(safeTopMargin, Math.random() * maxY) + 'px';
             enemy.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
             return enemy;
         }
@@ -660,14 +720,27 @@
 
         function spawnShieldedEnemy() {
             const enemy = createBaseEnemy(); enemy.classList.add('shielded'); enemy.dataset.shielded = "true";
+            enemy.dataset.hp = "3"; // 设置需要连点3次 (手机端)
+            
             const badge = document.createElement('div'); badge.className = 'shield-badge';
-            const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; badge.innerText = keys.charAt(Math.floor(Math.random() * keys.length));
-            enemy.appendChild(badge); setupEnemyLife(enemy, 3500);
+            const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; 
+            badge.innerText = keys.charAt(Math.floor(Math.random() * keys.length)); // 显示随机字母
+            enemy.appendChild(badge); setupEnemyLife(enemy, 4000);
         }
 
-        function breakShield(enemy, badge) {
-            badge.remove(); enemy.classList.remove('shielded'); enemy.dataset.shielded = "false";
-            document.body.classList.add('shake-hard'); setTimeout(() => document.body.classList.remove('shake-hard'), 100);
+        function hitShield(enemy, badge, isKeyboard = false) {
+            if (!badge) return;
+            let hp = parseInt(enemy.dataset.hp) - 1;
+            if (isKeyboard) hp = 0; // 键盘玩家直接秒破盾
+            enemy.dataset.hp = hp;
+            if (hp <= 0) {
+                badge.remove(); enemy.classList.remove('shielded'); enemy.dataset.shielded = "false";
+                document.body.classList.add('shake-hard'); setTimeout(() => document.body.classList.remove('shake-hard'), 100);
+            } else {
+                // 每次点击给予微小视觉反馈
+                enemy.style.transform = `scale(0.9) rotate(${Math.random() * 20 - 10}deg)`;
+                setTimeout(() => enemy.style.transform = `scale(1) rotate(${Math.random() * 40 - 20}deg)`, 100);
+            }
         }
 
         function spawnEliteEnemy() {
@@ -715,9 +788,11 @@
         }
 
         function bossActionLoop() {
+            // Boss 弱点定位基于父容器百分比，完美适应不同分辨率与缩放状态
             if(Math.random() > 0.3) {
                 const wp = document.createElement('div'); wp.className = 'weak-point';
-                const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; wp.innerText = keys.charAt(Math.floor(Math.random() * keys.length));
+                const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'; 
+                wp.innerText = keys.charAt(Math.floor(Math.random() * keys.length));
                 wp.style.left = (10 + Math.random() * 80) + '%'; wp.style.top = (10 + Math.random() * 80) + '%';
                 document.getElementById('boss-container').appendChild(wp);
                 setTimeout(() => { if(wp.parentNode) wp.remove(); }, 2500);
@@ -727,7 +802,13 @@
                 const popup = document.createElement('div'); popup.className = 'error-popup';
                 popup.innerHTML = `<div class="error-header"><span>Error</span><span>X</span></div><div class="error-body"><span class="text-xl text-red-600 font-black">X</span> BOT Behavior</div>`;
                 const bossRect = document.getElementById('boss-wrapper').getBoundingClientRect();
-                popup.style.left = (bossRect.left + Math.random() * (bossRect.width - 180)) + 'px'; popup.style.top = (bossRect.bottom - 50) + 'px';
+                
+                // 确保弹窗不会生成在屏幕边缘之外
+                let startX = bossRect.left + Math.random() * (bossRect.width - 180);
+                startX = Math.max(10, Math.min(window.innerWidth - 190, startX));
+                popup.style.left = startX + 'px'; 
+                popup.style.top = (bossRect.bottom - 50) + 'px';
+                
                 document.getElementById('battle-arena').appendChild(popup);
                 
                 let y = parseFloat(popup.style.top);
@@ -749,7 +830,6 @@
                 clearInterval(bossInterval); 
                 document.querySelectorAll('.weak-point, .error-popup').forEach(el => el.remove()); 
                 
-                // 隐藏战斗与报错 UI，恢复主界面
                 document.getElementById('battle-arena').style.display = 'none';
                 document.getElementById('auth-wrapper').style.display = 'flex';
                 
@@ -758,17 +838,12 @@
                 errBox.classList.remove('flex');
                 document.getElementById('action-buttons').classList.add('hidden');
                 
-                // 重置战斗状态以便后续可能触发的战斗
-                score = 0; 
-                missedCount = 0; 
-                bossHp = 100; 
-                bossMode = false;
+                score = 0; missedCount = 0; bossHp = 100; bossMode = false;
                 document.getElementById('score').innerText = score;
                 document.getElementById('missed').innerText = missedCount;
                 document.getElementById('boss-hp').style.width = '100%';
                 document.getElementById('boss-wrapper').style.display = 'none';
                 
-                // 强制通关当前关卡
                 progressLevel(); 
             }
         }
